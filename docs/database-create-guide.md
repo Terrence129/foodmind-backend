@@ -1,0 +1,1 @@
+psql -U postgres -d foodmind -f V1__init_foodmind_schema.sql
