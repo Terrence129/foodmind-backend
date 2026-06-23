@@ -3,6 +3,7 @@ package com.foodmind.auth.service;
 import com.foodmind.auth.dto.AuthResponse;
 import com.foodmind.auth.dto.LoginRequest;
 import com.foodmind.auth.dto.RegisterRequest;
+import com.foodmind.common.enums.UserStatus;
 import com.foodmind.config.security.JwtService;
 import com.foodmind.user.dto.UserResponse;
 import com.foodmind.user.entity.User;
@@ -12,6 +13,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +33,16 @@ public class AuthService {
             throw new IllegalArgumentException("Username already exists");
         }
 
+        OffsetDateTime now = OffsetDateTime.now();
+
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .username(request.getUsername())
+                .status(UserStatus.ACTIVE)
+                .emailVerified(false)
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
 
         User savedUser = userRepository.save(user);
