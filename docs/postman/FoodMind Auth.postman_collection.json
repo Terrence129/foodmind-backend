@@ -1,0 +1,331 @@
+{
+  "info": {
+    "_postman_id": "b8a85932-51f6-4e8e-8d73-9f3df07a32ad",
+    "name": "FoodMind Auth",
+    "description": "Import this collection into Postman to test FoodMind authentication. Run the requests in order. The Register request creates fresh credentials unless the `reuseCredentials` collection variable is set to `true`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reuseCredentials = pm.collectionVariables.get('reuseCredentials') === 'true';",
+                  "",
+                  "if (!reuseCredentials) {",
+                  "  const suffix = Date.now();",
+                  "  pm.collectionVariables.set('testEmail', `foodmind.auth.${suffix}@example.com`);",
+                  "  pm.collectionVariables.set('testUsername', `foodmind_auth_${suffix}`);",
+                  "  pm.collectionVariables.set('testPassword', 'Password123!');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('register returns 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('register response contains token and user', function () {",
+                  "  pm.expect(json).to.have.property('token').that.is.a('string').and.is.not.empty;",
+                  "  pm.expect(json).to.have.property('user').that.is.an('object');",
+                  "  pm.expect(json.user).to.have.property('id');",
+                  "  pm.expect(json.user.email).to.eql(pm.collectionVariables.get('testEmail'));",
+                  "  pm.expect(json.user.username).to.eql(pm.collectionVariables.get('testUsername'));",
+                  "  pm.expect(json.user.profileCompleted).to.eql(false);",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('authToken', json.token);",
+                  "pm.collectionVariables.set('userId', String(json.user.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"username\": \"{{testUsername}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('login returns 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('login response contains token and matching user', function () {",
+                  "  pm.expect(json).to.have.property('token').that.is.a('string').and.is.not.empty;",
+                  "  pm.expect(json.user.email).to.eql(pm.collectionVariables.get('testEmail'));",
+                  "  pm.expect(json.user.username).to.eql(pm.collectionVariables.get('testUsername'));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('authToken', json.token);",
+                  "pm.collectionVariables.set('userId', String(json.user.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Register - 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('duplicate register returns 400 Bad Request', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('duplicate register returns useful error body', function () {",
+                  "  pm.expect(json.status).to.eql(400);",
+                  "  pm.expect(json.message).to.match(/Email already exists|Username already exists/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"username\": \"{{testUsername}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Validation - 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('short password returns 400 Bad Request', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('validation error contains password message', function () {",
+                  "  pm.expect(json.status).to.eql(400);",
+                  "  pm.expect(json.message).to.eql('Validation failed');",
+                  "  pm.expect(json.errors).to.have.property('password');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invalid-short-password@example.com\",\n  \"password\": \"short\",\n  \"username\": \"invalid_short_password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Wrong Password - 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('wrong password returns 401 Unauthorized', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('wrong password returns useful error body', function () {",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "  pm.expect(json.message).to.eql('Invalid email or password');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"WrongPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "Password123!",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reuseCredentials",
+      "value": "false",
+      "type": "string"
+    }
+  ]
+}
