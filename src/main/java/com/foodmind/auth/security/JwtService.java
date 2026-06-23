@@ -1,4 +1,4 @@
-package com.foodmind.config.security;
+package com.foodmind.auth.security;
 
 /**
  * @description:
