@@ -4,7 +4,7 @@ import com.foodmind.auth.dto.AuthResponse;
 import com.foodmind.auth.dto.LoginRequest;
 import com.foodmind.auth.dto.RegisterRequest;
 import com.foodmind.common.enums.UserStatus;
-import com.foodmind.config.security.JwtService;
+import com.foodmind.auth.security.JwtService;
 import com.foodmind.user.dto.UserResponse;
 import com.foodmind.user.entity.User;
 import com.foodmind.user.repository.UserRepository;

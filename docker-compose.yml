@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: foodmind-postgres
+    environment:
+      POSTGRES_DB: foodmind
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5433:5432"
+    volumes:
+      - foodmind_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d foodmind"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: foodmind-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      # Inside Docker network, use service name "db" and internal port 5432
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/foodmind
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      JWT_SECRET: qwertyuiopasdfghjkklzxcvbnmqwertyuioooop
+      JWT_EXPIRATION: 86400000
+      APP_CORS_ALLOWED_ORIGINS: "/**"
+    ports:
+      - "8080:8080"
+
+volumes:
+  foodmind_postgres_data:

@@ -1,4 +1,4 @@
-package com.foodmind.config.security;
+package com.foodmind.auth.security;
 
 import com.foodmind.user.entity.User;
 import com.foodmind.user.repository.UserRepository;
