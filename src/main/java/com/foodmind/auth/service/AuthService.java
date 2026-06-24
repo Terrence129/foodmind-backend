@@ -5,14 +5,20 @@ import com.foodmind.auth.dto.LoginRequest;
 import com.foodmind.auth.dto.RegisterRequest;
 import com.foodmind.common.enums.UserStatus;
 import com.foodmind.auth.security.JwtService;
+import com.foodmind.profile.repository.UserProfileRepository;
 import com.foodmind.user.dto.UserResponse;
 import com.foodmind.user.entity.User;
 import com.foodmind.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 
@@ -24,6 +30,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserProfileRepository userProfileRepository;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -79,6 +86,26 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(token)
                 .user(userResponse)
+                .build();
+    }
+
+    public UserResponse me(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication is required");
+        }
+
+        User user = userRepository.findByEmailIgnoreCase(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Current user not found"));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .avatarUrl(user.getAvatarUrl())
+                .status(user.getStatus())
+                .profileCompleted(userProfileRepository.findByUser_Id(user.getId()).isPresent())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

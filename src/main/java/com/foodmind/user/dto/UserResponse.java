@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 /**
  * @description:
@@ -22,5 +23,7 @@ public class UserResponse implements Serializable {
     private String email;
     private String username;
     private String avatarUrl;
+    private UserStatus status;
     private Boolean profileCompleted;
+    private OffsetDateTime  createdAt;
 }
