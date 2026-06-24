@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "FoodMind Profile API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"register should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"username\": \"Dadao\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"login should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "if (json.data && json.data.token) {",
+              "    pm.environment.set(\"token\", json.data.token);",
+              "} else if (json.token) {",
+              "    pm.environment.set(\"token\", json.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get My Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"get profile should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"profile response should contain userId\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "    pm.expect(data).to.have.property(\"userId\");",
+              "});",
+              "",
+              "pm.test(\"profile list fields should not be null\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "",
+              "    pm.expect(data.likedCuisines).to.be.an(\"array\");",
+              "    pm.expect(data.dislikedCuisines).to.be.an(\"array\");",
+              "    pm.expect(data.dietaryRestrictions).to.be.an(\"array\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "profile",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update My Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"update profile should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"profile should be updated correctly\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "",
+              "    pm.expect(Number(data.budgetMin)).to.eql(4.00);",
+              "    pm.expect(Number(data.budgetMax)).to.eql(15.00);",
+              "    pm.expect(data.spicyTolerance).to.eql(3);",
+              "    pm.expect(data.locationArea).to.eql(\"NUS\");",
+              "    pm.expect(data.foodGoal).to.eql(\"AVOID_REPETITION\");",
+              "    pm.expect(data.defaultPrivacyLevel).to.eql(\"PRIVATE\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"budgetMin\": 4.00,\n  \"budgetMax\": 15.00,\n  \"spicyTolerance\": 3,\n  \"locationArea\": \"NUS\",\n  \"foodGoal\": \"AVOID_REPETITION\",\n  \"defaultPrivacyLevel\": \"PRIVATE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "profile",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Cuisine Preferences",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"update cuisine preferences should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"cuisine preferences should be replaced\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "",
+              "    pm.expect(data.likedCuisines).to.include(\"Chinese\");",
+              "    pm.expect(data.likedCuisines).to.include(\"Japanese\");",
+              "    pm.expect(data.dislikedCuisines).to.include(\"Western Fast Food\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"likedCuisines\": [\"Chinese\", \"Japanese\"],\n  \"dislikedCuisines\": [\"Western Fast Food\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/cuisine-preferences",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "profile",
+            "cuisine-preferences"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Dietary Restrictions",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"update dietary restrictions should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"dietary restrictions should be replaced\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "",
+              "    pm.expect(data.dietaryRestrictions).to.include(\"No beef\");",
+              "    pm.expect(data.dietaryRestrictions).to.include(\"No peanuts\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"dietaryRestrictions\": [\"No beef\", \"No peanuts\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/profile/dietary-restrictions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "profile",
+            "dietary-restrictions"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": "dadao@example.com"
+    },
+    {
+      "key": "userPassword",
+      "value": "Password123!"
+    }
+  ]
+}

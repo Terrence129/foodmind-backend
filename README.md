@@ -313,7 +313,7 @@ POST /api/recommendations/{id}/reject
 
 ### Phase 1
 
-* [ ] Authentication
+* [X] Authentication
 * [ ] User Profile
 * [ ] Meal CRUD
 * [ ] Drink CRUD
