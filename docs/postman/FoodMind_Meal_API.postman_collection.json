@@ -1,0 +1,365 @@
+{
+  "info": {
+    "name": "FoodMind Meal API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"username\": \"Dadao\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"login should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "if (json.data && json.data.token) {",
+              "    pm.environment.set(\"token\", json.data.token);",
+              "} else if (json.token) {",
+              "    pm.environment.set(\"token\", json.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Meal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"create meal should return 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const data = json.data || json;",
+              "",
+              "pm.test(\"created meal should contain id\", function () {",
+              "    pm.expect(data).to.have.property(\"id\");",
+              "});",
+              "",
+              "if (data.id) {",
+              "    pm.environment.set(\"mealId\", data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"groupId\": null,\n  \"foodName\": \"Chicken Rice\",\n  \"restaurantName\": \"NUS Canteen Store 3\",\n  \"cuisineType\": \"Chinese\",\n  \"mealType\": \"LUNCH\",\n  \"price\": 5.50,\n  \"rating\": 4.5,\n  \"comment\": \"Good portion\",\n  \"photoUrl\": null,\n  \"wouldEatAgain\": true,\n  \"privacyLevel\": \"PRIVATE\",\n  \"consumedAt\": \"2026-06-23T12:30:00+08:00\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/meals",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "meals"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Meals",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"list meals should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"list response should contain items array\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "    pm.expect(data.items).to.be.an(\"array\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/meals?mealType=LUNCH&cuisineType=Chinese&page=0&size=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "meals"
+          ],
+          "query": [
+            {
+              "key": "mealType",
+              "value": "LUNCH"
+            },
+            {
+              "key": "cuisineType",
+              "value": "Chinese"
+            },
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Meal Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"get meal detail should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"meal detail should match mealId\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "    pm.expect(String(data.id)).to.eql(pm.environment.get(\"mealId\"));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/meals/{{mealId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "meals",
+            "{{mealId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Meal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"update meal should return 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"meal should be updated\", function () {",
+              "    const json = pm.response.json();",
+              "    const data = json.data || json;",
+              "",
+              "    pm.expect(data.foodName).to.eql(\"Updated Chicken Rice\");",
+              "    pm.expect(data.mealType).to.eql(\"LUNCH\");",
+              "    pm.expect(data.privacyLevel).to.eql(\"PRIVATE\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"groupId\": null,\n  \"foodName\": \"Updated Chicken Rice\",\n  \"restaurantName\": \"NUS Canteen Store 3\",\n  \"cuisineType\": \"Chinese\",\n  \"mealType\": \"LUNCH\",\n  \"price\": 6.00,\n  \"rating\": 4.0,\n  \"comment\": \"Still good\",\n  \"photoUrl\": null,\n  \"wouldEatAgain\": true,\n  \"privacyLevel\": \"PRIVATE\",\n  \"consumedAt\": \"2026-06-23T12:30:00+08:00\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/meals/{{mealId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "meals",
+            "{{mealId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Meal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"delete meal should return success\", function () {",
+              "    pm.expect([200, 204]).to.include(pm.response.code);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/meals/{{mealId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "meals",
+            "{{mealId}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "mealId",
+      "value": ""
+    },
+    {
+      "key": "groupId",
+      "value": "1"
+    },
+    {
+      "key": "userEmail",
+      "value": "dadao@example.com"
+    },
+    {
+      "key": "userPassword",
+      "value": "Password123!"
+    }
+  ]
+}

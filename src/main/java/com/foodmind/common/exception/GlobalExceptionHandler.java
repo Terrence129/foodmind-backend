@@ -2,12 +2,14 @@ package com.foodmind.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -56,6 +58,22 @@ public class GlobalExceptionHandler {
             AuthenticationException exception
     ) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, exception.getMessage(), null);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
+            AccessDeniedException exception
+    ) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, exception.getMessage(), null);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            ResponseStatusException exception
+    ) {
+        HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
+        String message = exception.getReason() == null ? status.getReasonPhrase() : exception.getReason();
+        return buildErrorResponse(status, message, null);
     }
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(
